@@ -49,18 +49,33 @@ class ViewController: UIViewController {
         updateUI()
         
         _ = Timer.scheduledTimer(withTimeInterval: 10, repeats: false, block: {timer in
-            self.isGameStarted = false
             self.player1Button.isEnabled = false
             self.player2Button.isEnabled = false
-            //TODO:
-            let actionHandler = {(action: UIAlertAction!) -> Void in
-                let gameOverMessage = UIAlertController(title: "", message: "", preferredStyle: .alert)
-                gameOverMessage.addAction(UIAlertAction(title: "", style: .default, handler: nil))
-                self.present(gameOverMessage, animated: true, completion: nil)
+            var winner:String
+            switch self.findWinner(oneScore: self.player1score, twoScore: self.player2score) {
+            case 1:
+                winner = "Player 1"
+            case 2:
+                winner = "Player 2"
+            default:
+                winner = "It's a tie!"
             }
             
-            let callHandler = UIAlertAction(title: "Call", style: .default, handler: actionHandler)
-            .addAction(callHandler)
+            if (winner != "It's a tie!") {
+                let gameOverAlert = UIAlertController(title: "Game Over", message: winner + " wins", preferredStyle: UIAlertControllerStyle.alert)
+                gameOverAlert.addAction(UIAlertAction(title: "Reset Game", style: UIAlertActionStyle.default, handler: { (action) in
+                    self.resetGame()
+                    self.isGameStarted = false
+                }))
+                self.present(gameOverAlert, animated: true, completion: nil)
+            } else {
+                let gameOverAlert = UIAlertController(title: "Game Over", message: winner, preferredStyle: UIAlertControllerStyle.alert)
+                gameOverAlert.addAction(UIAlertAction(title: "Reset Game", style: UIAlertActionStyle.default, handler: { (action) in
+                    self.resetGame()
+                    self.isGameStarted = false
+                }))
+                self.present(gameOverAlert, animated: true, completion: nil)
+            }
         
         })
         
@@ -72,6 +87,7 @@ class ViewController: UIViewController {
         updateUI()
     }
     
+    //MARK:Functions
     func updateUI() {
         if isGameStarted {
             player1Score.text = "Player 1 Score = \(player1score)"
@@ -87,7 +103,12 @@ class ViewController: UIViewController {
         }
         return 3
     }
-
+    
+    func resetGame() {
+        self.player1score = 0
+        self.player2score = 0
+        self.updateUI()
+    }
 
 }
 
