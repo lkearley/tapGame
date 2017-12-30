@@ -13,6 +13,8 @@ class ViewController: UIViewController {
     var player1score: Int = 0
     var player2score: Int = 0
     var isGameStarted: Bool = false
+    var highscore = 0
+    let defaults = UserDefaults.standard
     
     //MARK: Properties
     @IBOutlet weak var player1Score: UILabel!
@@ -26,7 +28,12 @@ class ViewController: UIViewController {
         updateUI()
         player1Button.isEnabled = false
         player2Button.isEnabled = false
+        self.highscore = defaults.integer(forKey: "score")
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        viewDidLoad()
     }
 
     override func didReceiveMemoryWarning() {
@@ -54,28 +61,25 @@ class ViewController: UIViewController {
             var winner:String
             switch self.findWinner(oneScore: self.player1score, twoScore: self.player2score) {
             case 1:
-                winner = "Player 1"
+                winner = "Player 1 wins"
             case 2:
-                winner = "Player 2"
+                winner = "Player 2 wins"
             default:
                 winner = "It's a tie!"
             }
-            
-            if (winner != "It's a tie!") {
-                let gameOverAlert = UIAlertController(title: "Game Over", message: winner + " wins", preferredStyle: UIAlertControllerStyle.alert)
-                gameOverAlert.addAction(UIAlertAction(title: "Reset Game", style: UIAlertActionStyle.default, handler: { (action) in
-                    self.resetGame()
-                    self.isGameStarted = false
-                }))
-                self.present(gameOverAlert, animated: true, completion: nil)
-            } else {
-                let gameOverAlert = UIAlertController(title: "Game Over", message: winner, preferredStyle: UIAlertControllerStyle.alert)
-                gameOverAlert.addAction(UIAlertAction(title: "Reset Game", style: UIAlertActionStyle.default, handler: { (action) in
-                    self.resetGame()
-                    self.isGameStarted = false
-                }))
-                self.present(gameOverAlert, animated: true, completion: nil)
+            if (self.highscore < self.player1score && self.player1score > self.player2score) {
+                winner = winner + "\n\nNew High Score!"
+                self.defaults.set(self.player1score, forKey: "score")
+            } else if (self.highscore < self.player2score) {
+                winner = winner + "\n\nNew High Score!"
+                self.defaults.set(self.player2score, forKey: "score")
             }
+            let gameOverAlert = UIAlertController(title: "Game Over ", message: winner, preferredStyle: UIAlertControllerStyle.alert)
+            gameOverAlert.addAction(UIAlertAction(title: "Reset Game", style: UIAlertActionStyle.default, handler: { (action) in
+                self.resetGame()
+                self.isGameStarted = false
+            }))
+            self.present(gameOverAlert, animated: true, completion: nil)
         
         })
         
@@ -107,7 +111,10 @@ class ViewController: UIViewController {
     func resetGame() {
         self.player1score = 0
         self.player2score = 0
+        self.player1Button.isEnabled = false
+        self.player2Button.isEnabled = false
         self.updateUI()
+        self.highscore = defaults.integer(forKey: "score")
     }
 
 }
